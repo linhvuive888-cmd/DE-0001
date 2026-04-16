@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hành Trình Tri Thức 12 - THPT Đakrông</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --primary: #6c5ce7; 
+            --secondary: #a29bfe; 
+            --correct: #00b894; 
+            --wrong: #d63031; 
+            --glass: rgba(255, 255, 255, 0.96);
+            --q-bg: #f8faff;
+            --accent-yellow: #feca57;
+            --grad-1: linear-gradient(45deg, #6c5ce7, #a29bfe);
+            --grad-2: linear-gradient(45deg, #fd79a8, #ff7675);
+        }
+
+        body { 
+            font-family: 'Quicksand', sans-serif; 
+            background: linear-gradient(135deg, #a29bfe, #6c5ce7, #fd79a8); 
+            background-size: 400% 400%; 
+            animation: gradientBG 15s ease infinite; 
+            min-height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            margin: 0; 
+        }
+
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        .container { 
+            background: var(--glass); 
+            width: 95%; 
+            max-width: 800px; 
+            padding: 35px; 
+            border-radius: 40px; 
+            box-shadow: 0 30px 70px rgba(0,0,0,0.3); 
+            text-align: center; 
+            position: relative;
+            border: 3px solid rgba(255,255,255,0.7);
+        }
+
+        /* Thanh trạng thái sắc nét */
+        .status-bar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: #fff; 
+            padding: 15px 30px; 
+            border-radius: 60px; 
+            margin-bottom: 30px;
+            box-shadow: 0 10px 20px rgba(108, 92, 231, 0.1);
+        }
+
+        .score-badge {
+            background: var(--grad-1);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3);
+        }
+
+        .timer { font-weight: 800; color: var(--wrong); font-size: 1.2rem; }
+
+        /* Màn hình chào mừng sau đăng nhập */
+        #welcome-screen { display: none; }
+        .welcome-text { font-size: 2rem; color: var(--primary); font-weight: 800; margin: 30px 0; }
+
+        .part-badge { 
+            background: var(--grad-2); 
+            color: white; 
+            padding: 10px 25px; 
+            border-radius: 20px; 
+            font-weight: 700; 
+            margin-bottom: 25px; 
+            display: inline-block;
+            box-shadow: 0 5px 15px rgba(253, 121, 168, 0.3);
+        }
+
+        /* Khung câu hỏi Gradient */
+        #question-container {
+            background: white;
+            padding: 4px;
+            border-radius: 30px;
+            background-image: linear-gradient(white, white), radial-gradient(circle at top left, #6c5ce7, #fd79a8);
+            background-origin: border-box;
+            background-clip: content-box, border-box;
+            margin-bottom: 30px;
+        }
+
+        .question-content {
+            padding: 30px;
+            background: #fdfdff;
+            border-radius: 26px;
+        }
+
+        #question-box { 
+            font-size: 1.35rem; 
+            font-weight: 700; 
+            text-align: left; 
+            line-height: 1.6; 
+            color: #2d3436;
+        }
+
+        /* Nút đáp án sắc màu & Bo viền */
+        .options-grid { display: grid; gap: 18px; }
+        .opt-btn { 
+            background: white; 
+            border: 2px solid #edf2f7; 
+            padding: 18px 25px; 
+            border-radius: 20px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            text-align: left; 
+            transition: all 0.3s; 
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+
+        .opt-btn:hover { 
+            border-color: var(--primary); 
+            transform: translateY(-4px);
+            box-shadow: 0 12px 25px rgba(108, 92, 231, 0.15);
+        }
+
+        .opt-circle {
+            width: 35px;
+            height: 35px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: white;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        /* Trắc nghiệm Đúng/Sai */
+        .true-false-card { 
+            background: #fff; 
+            padding: 20px; 
+            border-radius: 25px; 
+            margin-bottom: 18px; 
+            border: 2px solid #edf2f7; 
+            text-align: left; 
+            box-shadow: 0 5px 10px rgba(0,0,0,0.03);
+        }
+
+        .correct { background: var(--correct) !important; color: white !important; border-color: transparent !important; }
+        .wrong { background: var(--wrong) !important; color: white !important; border-color: transparent !important; animation: shake 0.5s; }
+
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+
+        #explain-box { 
+            background: #fff9db; 
+            padding: 25px; 
+            border-radius: 25px; 
+            margin-top: 25px; 
+            display: none; 
+            text-align: left; 
+            border-left: 10px solid #fcc419; 
+            animation: fadeIn 0.5s forwards; 
+        }
+
+        .btn-main { 
+            background: var(--grad-1); 
+            color: white; 
+            border: none; 
+            padding: 20px 55px; 
+            border-radius: 60px; 
+            font-weight: 800; 
+            cursor: pointer; 
+            font-size: 1.2rem; 
+            transition: 0.4s; 
+            margin-top: 20px; 
+            box-shadow: 0 10px 25px rgba(108, 92, 231, 0.4);
+        }
+        .btn-main:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(108, 92, 231, 0.5); }
+    </style>
+</head>
+<body>
+
+<audio id="bg-music" loop src="Cho-Ban-Cho-Toi-Lam-Truong.mp3"></audio>
+<audio id="sfx-correct" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
+<audio id="sfx-wrong" src="https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3"></audio>
+
+<div class="container">
+    <div id="login-screen">
+        <h2 style="color: var(--primary); letter-spacing: 3px;">TRƯỜNG THPT ĐAKRÔNG</h2>
+        <h1 style="font-size: 2.8rem; margin: 20px 0; color: #2d3436;">🌈 MÔN TIN HỌC 12 🌈</h1>
+        <p style="font-weight: 600; color: #636e72;">Đề minh họa mã 0001 - Cuối kỳ II</p>
+        <input type="text" id="user-name" placeholder="Nhập tên của bạn tại đây..." style="padding:22px; border-radius:20px; width:75%; border:3px solid var(--secondary); outline: none; margin-bottom: 30px; font-family: inherit; font-size: 1.2rem; text-align: center;"><br>
+        <button class="btn-main" onclick="showWelcome()">TIẾP TỤC ➔</button>
+    </div>
+
+    <div id="welcome-screen">
+        <h1 style="font-size: 4rem;">👋</h1>
+        <div id="welcome-message" class="welcome-text"></div>
+        <button class="btn-main" onclick="startQuiz()">BẮT ĐẦU THI</button>
+    </div>
+
+    <div id="quiz-screen" style="display:none">
+        <div class="status-bar">
+            <div class="timer">⏳ <span id="time-left">45:00</span></div>
+            <div class="score-badge">⭐ <span id="live-score">0.00</span> ĐIỂM</div>
+            <div style="cursor:pointer; font-size: 1.6rem;" onclick="toggleMusic()" id="music-btn">🔊</div>
+        </div>
+
+        <div id="part-tag" class="part-badge">PHẦN I: TRẮC NGHIỆM LỰA CHỌN</div>
+        <div id="info-bar" style="font-weight: 800; color: var(--primary); margin-bottom: 15px; font-size: 1.1rem;"></div>
+        
+        <div id="question-container">
+            <div class="question-content">
+                <div id="question-box"></div>
+            </div>
+        </div>
+
+        <div id="options-container" class="options-grid"></div>
+        <div id="tf-container" style="display:none"></div>
+
+        <div id="explain-box"><strong>💡 GIẢI THÍCH CHI TIẾT:</strong> <p id="ex-text" style="margin: 10px 0 0 0;"></p></div>
+        <button id="next-btn" class="btn-main" style="display:none" onclick="handleNext()">TIẾP TỤC ➔</button>
+    </div>
+
+    <div id="result-screen" style="display:none">
+        <h1 style="font-size: 6rem; margin: 0">🎖️</h1>
+        <h2 id="result-msg" style="font-size: 2.2rem; color: var(--primary);"></h2>
+        <div id="final-score" style="font-size: 5rem; font-weight: 900; color: #2d3436; margin: 30px 0;"></div>
+        <button class="btn-main" onclick="location.reload()">THI LẠI</button>
+    </div>
+</div>
+
+<script>
+    // Dữ liệu câu hỏi Phần I & II [cite: 412, 579, 728]
+    const part1Data = [
+        { q: "Trong CSS, thuộc tính nào sau đây được sử dụng để thay đổi màu nền của một phần tử?", o: ["color", "background-color", "bg-color", "text-color"], a: 1, e: "background-color dùng để thay đổi màu nền. color dùng cho màu chữ." },
+        { q: "Bộ chọn lớp (class selector) trong CSS luôn bắt đầu bằng kí tự nào?", o: ["Dấu thăng #", "Dấu chấm .", "Dấu sao *", "Dấu phẩy ,"], a: 1, e: "Class selector bắt đầu bằng dấu chấm (.). ID selector bắt đầu bằng #." },
+        { q: "Công việc chính của chuyên viên bảo trì máy tính là gì?", o: ["Lập trình phần mềm", "Thiết kế giao diện", "Sửa chữa, thay thế phần cứng và cài đặt HĐH", "Phân tích dữ liệu"], a: 2, e: "Bảo trì nhằm duy trì sự ổn định của hệ thống máy tính và hỗ trợ người dùng." },
+        { q: "Nhóm nghề quản trị mạng có trách nhiệm chính là:", o: ["Thiết kế giao diện web", "Đảm bảo mạng ổn định, bảo mật, an toàn", "Lắp ráp linh kiện", "Tiếp thị bán hàng"], a: 1, e: "Quản trị mạng lo việc vận hành và an toàn cho hệ thống kết nối." },
+        { q: "Tại sao chuyên viên bảo mật cần liên tục cập nhật kiến thức pháp luật?", o: ["Tăng tốc lập trình", "Tuân thủ quy định bảo vệ dữ liệu", "Chế tạo phần cứng", "Đàm phán hợp đồng"], a: 1, e: "Bảo mật gắn liền với quyền riêng tư và các quy định pháp lý về dữ liệu." },
+        { q: "An thích tháo lắp linh kiện, cài HĐH. Nhóm nghề nào phù hợp?", o: ["Quản trị CSDL", "Thiết kế đồ họa", "Dịch vụ sửa chữa và bảo trì máy tính", "Phát triển AI"], a: 2, e: "Sở thích tháo lắp linh kiện là đặc trưng của nghề bảo trì." },
+        { q: "Ngành Kỹ thuật phần mềm chủ yếu đào tạo về:", o: ["Quy trình thiết kế, phát triển, bảo trì phần mềm", "Kỹ thuật lắp ráp máy tính", "Xử lý video", "Sửa chữa điện lạnh"], a: 0, e: "Kỹ thuật phần mềm tập trung vào vòng đời phát triển của một ứng dụng." },
+        { q: "Bình muốn làm việc liên quan tạo giao diện website tương tác. Bình nên chọn ngành nào?", o: ["Viễn thông", "Phần cứng", "Khoa học máy tính hoặc CNTT (hướng web)", "Quản trị kinh doanh"], a: 2, e: "Xây dựng giao diện web là chuyên môn của hướng CNTT/Khoa học máy tính." },
+        { q: "Phần mềm Google Sites thuộc nhóm phần mềm nào?", o: ["Chỉnh sửa video", "Thiết kế đồ họa", "Tạo và quản lý web", "Lập trình CSDL"], a: 2, e: "Google Sites là công cụ tạo trang web kéo thả trực quan." },
+        { q: "Cấu trúc chung cơ bản của một trang web thường gồm mấy phần chính?", o: ["1 phần", "2 phần", "3 phần", "4 phần"], a: 2, e: "Gồm Header (Đầu trang), Body (Thân trang) và Footer (Chân trang)." },
+        { q: "Favicon là gì?", o: ["Biểu tượng đại diện trên tab trình duyệt", "Địa chỉ tên miền", "Thông tin bản quyền", "Tệp video nhúng"], a: 0, e: "Favicon giúp nhận diện website nhanh chóng trên tab trình duyệt." },
+        { q: "Trong Google Sites, để chèn đoạn văn bản ta chọn công cụ nào?", o: ["Hình ảnh", "Hộp văn bản", "Nhúng", "Chân trang"], a: 1, e: "Dùng công cụ 'Hộp văn bản' (Text box) trong bảng chọn Chèn." },
+        { q: "Để đưa trang web lên Internet cho người khác xem, ta dùng chức năng nào?", o: ["Lưu trữ", "Công bố", "Chia sẻ", "Chỉnh sửa"], a: 1, e: "Nút 'Công bố' (Publish) giúp trang web hiển thị công khai." },
+        { q: "Mục 'Drive' trong bảng chọn Chèn dùng để:", o: ["Tìm ảnh Google", "Chèn tệp, thư mục từ Drive cá nhân", "Vẽ biểu đồ", "Quản lý rác"], a: 1, e: "Tích hợp các tài liệu từ kho lưu trữ Google vào trang web." },
+        { q: "Tuỳ chọn kích thước Header nào KHÔNG có trong Google Sites?", o: ["Bìa", "Biểu ngữ lớn", "Chỉ có tiêu đề", "Hình nền động"], a: 3, e: "Sites chỉ có: Bìa, Biểu ngữ lớn, Biểu ngữ, Chỉ có tiêu đề." },
+        { q: "Khối nội dung (Content Blocks) giúp ích gì?", o: ["Đổi tên miền", "Bố cục sắp xếp ảnh, chữ nhanh chóng", "Viết mã CSS trực tiếp", "Chặn truy cập"], a: 1, e: "Giúp người dùng sắp xếp nội dung đẹp mắt nhanh chóng." },
+        { q: "Nút 'Xem trước' (Preview) hình thiết bị giúp:", o: ["Xuất bản web", "Xem giao diện hiển thị trên nhiều thiết bị", "Xóa dữ liệu", "In ấn"], a: 1, e: "Kiểm tra hiển thị web trên PC, điện thoại và máy tính bảng." },
+        { q: "Việc sử dụng Giao diện (Theme) có sẵn mang lại lợi ích gì?", o: ["Tăng tốc tải", "Đảm bảo đồng bộ màu sắc, phông chữ", "Tự động dịch", "Chống hacker"], a: 1, e: "Theme giúp toàn bộ website có phong cách thiết kế thống nhất." },
+        { q: "'Người xem đã công bố: Bất kỳ ai có đường liên kết' nghĩa là:", o: ["Mọi người có thể sửa", "Mọi người có thể xem nhưng không thể sửa", "Chỉ người tạo mới xem được", "Trang web tự xóa sau 24h"], a: 1, e: "Quyền xem giới hạn người dùng không thể chỉnh sửa nội dung." },
+        { q: "Tại sao nên xây dựng sơ đồ trang web trước khi thiết kế?", o: ["Tìm ảnh dễ hơn", "Tổ chức thông tin logic, dễ điều hướng", "Máy chạy mượt hơn", "Tiết kiệm Drive"], a: 1, e: "Sơ đồ là khung xương giúp điều hướng người dùng hiệu quả." },
+        { q: "Phần chân trang (Footer) thường chứa:", o: ["Bài viết mới", "Thanh menu chính", "Bản quyền, liên hệ, mạng xã hội", "Slide ảnh"], a: 2, e: "Nơi cung cấp thông tin liên hệ và tính pháp lý của web." },
+        { q: "Khi tạo trang con (Subpages), Menu điều hướng sẽ thay đổi thế nào?", o: ["Tự động thêm liên kết mới", "Tự động ẩn đi", "Yêu cầu thiết kế lại", "Không thay đổi gì"], a: 0, e: "Menu tự động cập nhật đường dẫn đến các trang con mới." },
+        { q: "Tính năng 'Nhúng' (Embed) thường dùng để:", o: ["Soạn văn bản", "Tích hợp nội dung bên thứ ba (bản đồ, video...)", "Tải tệp âm thanh", "Đổi Favicon"], a: 1, e: "Mang các nội dung từ nền tảng khác vào website của mình." },
+        { q: "Gắn liên kết vào cụm từ (ví dụ: 'Bấm vào đây') tạo ra:", o: ["Siêu liên kết (Hyperlink)", "Cảnh báo tải trang", "Trang con tự động", "Mã bảo mật"], a: 0, e: "Tạo liên kết chuyển hướng người dùng khi nhấp vào." },
+        { q: "Cách tối ưu nhất để đưa số lượng lớn ảnh kỷ niệm lên web?", o: ["Chèn từng ảnh", "Tạo thư mục Drive rồi chèn thư mục", "Chèn link văn bản", "Nén file .rar"], a: 1, e: "Chèn thư mục Drive giúp quản lý ảnh khoa học và hiển thị đẹp." },
+        { q: "Công cụ nào dùng để lấy ý kiến đóng góp của học sinh trên web?", o: ["Google Maps", "Google Docs", "Google Forms", "Google Sheets"], a: 2, e: "Biểu mẫu (Forms) là cách thu thập ý kiến chuyên nghiệp nhất." },
+        { q: "Để làm nổi bật dòng chữ chào mừng ở trang chủ, nên chọn loại tiêu đề nào?", o: ["Chỉ có tiêu đề", "Bìa hoặc Biểu ngữ lớn", "Chân trang", "Đường viền"], a: 1, e: "Header kích thước lớn giúp gây ấn tượng thị giác ngay lập tức." },
+        { q: "Sau khi sửa nội dung trang đã công bố, bạn phải làm gì?", o: ["Hệ thống tự cập nhật", "Xóa link cũ làm lại", "Nhấn nút 'Công bố' lại", "Gửi link mới"], a: 2, e: "Bắt buộc nhấn Công bố lại để hệ thống cập nhật bản sửa đổi." }
+    ];
+
+    const part2Data = [
+        {
+            q: "Câu 1: Mã CSS: p { color: blue; } .tieude { color: red; font-weight: bold; } <br> HTML: <p class='tieude'>ĐIỀU TÂM CẦN HIỂU</p>",
+            sub: [
+                { t: "a) color dùng để thay đổi màu nền.", ans: false, e: "color dùng đổi màu chữ, nền là background-color." },
+                { t: "b) .tieude là cách khai báo bộ chọn lớp (Class selector).", ans: true, e: "Chính xác, dấu chấm (.) đại diện cho class." },
+                { t: "c) Khi hiển thị, dòng chữ sẽ có màu xanh (blue).", ans: false, e: "Class (.tieude) ưu tiên hơn thẻ (p) nên chữ màu đỏ." },
+                { t: "d) Nếu thêm !important vào thẻ p, chữ sẽ chuyển sang xanh.", ans: true, e: "!important có quyền ưu tiên cao nhất." }
+            ]
+        },
+        {
+            q: "Câu 2: Nhóm học sinh thiết kế trang web CLB 5-20 trên Google Sites.",
+            sub: [
+                { t: "a) Có thể tự tải lên hình ảnh biểu trưng để làm Logo.", ans: true, e: "Đúng, Sites cho phép tùy biến logo đầu trang." },
+                { t: "b) Chỉ cho phép tạo tối đa 3 trang con (Subpages).", ans: false, e: "Google Sites cho phép tạo rất nhiều trang con." },
+                { t: "c) Nhúng sơ đồ đường đi qua Google Maps.", ans: true, e: "Tính năng này tích hợp sẵn trong mục Chèn." },
+                { t: "d) Chọn 'Người xem đã công bố' để ai cũng có thể XÓA/SỬA.", ans: false, e: "Quyền xem chỉ dành cho việc đọc nội dung." }
+            ]
+        },
+        {
+            q: "Câu 3: Hoàn thiện trang web 'Sổ tay Đại sứ Hạnh phúc':",
+            sub: [
+                { t: "a) Có thể gắn siêu liên kết vào hình ảnh.", ans: true, e: "Hình ảnh có thể đóng vai trò như một liên kết." },
+                { t: "b) Footer bắt buộc phải thiết kế lại ở mỗi trang con.", ans: false, e: "Footer đồng bộ trên mọi trang, không cần làm lại." },
+                { t: "c) Dùng 'Xem trước' để kiểm tra giao diện di động.", ans: true, e: "Đây là bước quan trọng để tối ưu hiển thị." },
+                { t: "d) Không thể nhúng video YouTube vào Google Sites.", ans: false, e: "Nhúng YouTube cực kỳ dễ dàng qua nút công cụ." }
+            ]
+        }
+    ];
+
+    let currentIdx = 0; let score = 0; let timer; let isP2 = false; let musicOn = true;
+
+    function showWelcome() {
+        const name = document.getElementById('user-name').value;
+        if(!name) return alert("Thí sinh vui lòng nhập họ tên để dự thi!");
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('welcome-screen').style.display = 'block';
+        document.getElementById('welcome-message').innerText = `Chào bạn ${name}, chúc bạn thi tốt nhé!`;
+    }
+
+    function startQuiz() {
+        document.getElementById('welcome-screen').style.display = 'none';
+        document.getElementById('quiz-screen').style.display = 'block';
+        
+        const bgMusic = document.getElementById('bg-music');
+        bgMusic.volume = 0.4;
+        bgMusic.play().catch(() => {});
+        
+        startTimer(45 * 60); load();
+    }
+
+    function toggleMusic() { 
+        musicOn = !musicOn; musicOn ? document.getElementById('bg-music').play() : document.getElementById('bg-music').pause();
+        document.getElementById('music-btn').innerText = musicOn ? "🔊" : "🔇";
+    }
+
+    function startTimer(duration) {
+        let t = duration;
+        timer = setInterval(() => {
+            let m = Math.floor(t/60), s = t%60;
+            document.getElementById('time-left').innerText = `${m}:${s<10?'0':''}${s}`;
+            if(--t < 0) { clearInterval(timer); finish(); }
+        }, 1000);
+    }
+
+    function load() {
+        document.getElementById('explain-box').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'none';
+        const colors = ["#6c5ce7", "#fd79a8", "#feca57", "#00b894"];
+        
+        if(!isP2) {
+            document.getElementById('part-tag').innerText = "PHẦN I: TRẮC NGHIỆM LỰA CHỌN";
+            document.getElementById('info-bar').innerText = `🌈 CÂU HỎI ${currentIdx + 1} / 28`;
+            const d = part1Data[currentIdx];
+            document.getElementById('question-box').innerText = d.q;
+            const container = document.getElementById('options-container'); container.style.display = 'grid';
+            document.getElementById('tf-container').style.display = 'none';
+            container.innerHTML = "";
+            d.o.forEach((opt, i) => {
+                const btn = document.createElement('button'); btn.className = 'opt-btn';
+                btn.innerHTML = `<span class="opt-circle" style="background:${colors[i]}">${String.fromCharCode(65+i)}</span> ${opt}`;
+                btn.onclick = () => checkP1(i, btn);
+                container.appendChild(btn);
+            });
+        } else {
+            document.getElementById('part-tag').innerText = "PHẦN II: TRẮC NGHIỆM ĐÚNG/SAI";
+            document.getElementById('info-bar').innerText = `💎 CÂU HỎI ${currentIdx + 1} / 3`;
+            document.getElementById('options-container').style.display = 'none';
+            const tfc = document.getElementById('tf-container'); tfc.style.display = 'block';
+            const d = part2Data[currentIdx];
+            document.getElementById('question-box').innerHTML = d.q;
+            tfc.innerHTML = "";
+            d.sub.forEach((s, i) => {
+                const row = document.createElement('div'); row.className = 'true-false-card';
+                row.innerHTML = `<strong>${s.t}</strong><div class="tf-btns" id="row-${i}" style="margin-top:12px; display:flex; gap:10px">
+                    <button onclick="checkP2(${i}, true, this)" style="padding:10px 25px; border-radius:12px; border:2px solid #ddd; cursor:pointer; font-weight:700">ĐÚNG</button>
+                    <button onclick="checkP2(${i}, false, this)" style="padding:10px 25px; border-radius:12px; border:2px solid #ddd; cursor:pointer; font-weight:700">SAI</button>
+                </div><div id="ex-sub-${i}" style="display:none; font-size:1rem; color:#6c5ce7; margin-top:12px; padding:12px; background:#f0efff; border-radius:15px; border-left:4px solid var(--primary)">✨ Giải thích: ${s.e}</div>`;
+                tfc.appendChild(row);
+            });
+            document.getElementById('next-btn').style.display = 'inline-block';
+        }
+    }
+
+    function checkP1(idx, btn) {
+        const d = part1Data[currentIdx];
+        const all = document.querySelectorAll('.opt-btn');
+        all.forEach(b => b.style.pointerEvents = 'none');
+        if(idx === d.a) { 
+            score += 0.25; document.getElementById('live-score').innerText = score.toFixed(2);
+            btn.classList.add('correct'); 
+            document.getElementById('sfx-correct').play(); 
+        } else { 
+            btn.classList.add('wrong'); 
+            all[d.a].classList.add('correct'); 
+            document.getElementById('sfx-wrong').play(); 
+        }
+        document.getElementById('ex-text').innerText = d.e;
+        document.getElementById('explain-box').style.display = 'block';
+        document.getElementById('next-btn').style.display = 'inline-block';
+    }
+
+    function checkP2(sIdx, val, btn) {
+        const row = document.getElementById(`row-${sIdx}`);
+        row.querySelectorAll('button').forEach(b => b.style.pointerEvents = 'none');
+        if(val === part2Data[currentIdx].sub[sIdx].ans) { 
+            score += 0.25; document.getElementById('live-score').innerText = score.toFixed(2);
+            btn.classList.add('correct'); 
+            document.getElementById('sfx-correct').play(); 
+        } else { 
+            btn.classList.add('wrong'); 
+            document.getElementById('sfx-wrong').play(); 
+        }
+        document.getElementById(`ex-sub-${sIdx}`).style.display = 'block';
+    }
+
+    function handleNext() {
+        if(!isP2) {
+            currentIdx++; if(currentIdx >= 28) { currentIdx = 0; isP2 = true; }
+        } else {
+            currentIdx++; if(currentIdx >= 3) return finish();
+        }
+        load();
+    }
+
+    function finish() {
+        clearInterval(timer);
+        document.getElementById('quiz-screen').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'block';
+        document.getElementById('final-score').innerText = score.toFixed(2) + " / 10 ĐIỂM";
+        document.getElementById('result-msg').innerText = score >= 8 ? "XUẤT SẮC! 🏆" : "HÃY KIÊN TRÌ ÔN TẬP THÊM NHÉ! ✨";
+    }
+</script>
+</body>
+</html>
